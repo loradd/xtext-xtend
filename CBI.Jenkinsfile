@@ -2,13 +2,14 @@ pipeline {
   agent {
     kubernetes {
       label 'build-test-pod'
-      defaultContainer 'jnlp'
+      defaultContainer 'cbi-default'
       yaml '''
         apiVersion: v1
         kind: Pod
         spec:
-          - name: jnlp
-            image: 'eclipsecbi/jenkins-jnlp-agent'
+          containers:
+          - name: cbi-default
+            image: 'eclipsecbi/jenkins-cbi-default-agent'
             args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
             volumeMounts:
             - mountPath: /home/jenkins/.ssh
@@ -26,9 +27,15 @@ pipeline {
   }
   
   parameters {
-    choice(name: 'TARGET_PLATFORM', choices: ['oxygen', 'photon', 'r201809', 'r201812', 'latest'], description: 'Which Target Platform should be used?')
+    choice(name: 'TARGET_PLATFORM', choices: ['latest', 'oxygen', 'photon', 'r201809', 'r201812'], description: 'Which Target Platform should be used?')
   }
 
+  tools {
+    // see https://wiki.eclipse.org/Jenkins#Jenkins_configuration_and_tools_.28clustered_infra.29
+    maven 'apache-maven-latest'
+    jdk 'oracle-jdk8-latest'
+  }
+  
   options {
     buildDiscarder(logRotator(numToKeepStr:'15'))
   }
@@ -37,7 +44,7 @@ pipeline {
   triggers {
     pollSCM('H/5 * * * *')
   }
-  
+
   stages {
     stage('Checkout') {
       steps {
@@ -47,73 +54,104 @@ pipeline {
           fi
         '''
         checkout scm
-      }
-      if ("latest" == params.TARGET_PLATFORM) {
-        currentBuild.displayName = "#${BUILD_NUMBER}(x)"
-      } else if ("r201812" == params.TARGET_PLATFORM) {
-        currentBuild.displayName = "#${BUILD_NUMBER}(r)"
-      } else if ("r201809" == params.TARGET_PLATFORM) {
-        currentBuild.displayName = "#${BUILD_NUMBER}(q)"
-      } else if ("photon" == params.TARGET_PLATFORM) {
-        currentBuild.displayName = "#${BUILD_NUMBER}(p)"
-      } else {
-        currentBuild.displayName = "#${BUILD_NUMBER}(o)"
-      }
-
-      sh '''
-        sed_inplace() {
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "$@"
-          else
-            sed -i "$@" 
-          fi  
-        }
         
-        targetfiles="$(find releng -type f -iname '*.target')"
-        for targetfile in $targetfiles
-        do
-          echo "Redirecting target platforms in $targetfile to $JENKINS_URL"
-          sed_inplace "s?<repository location=\\".*/job/\\([^/]*\\)/job/\\([^/]*\\)/?<repository location=\\"$JENKINS_URL/job/\\1/job/\\2/?" $targetfile
-        done
-      '''
+        script {
+          if (params.TARGET_PLATFORM == 'latest') {
+            currentBuild.displayName = "#${BUILD_NUMBER}(4.11)"
+          } else if (params.TARGET_PLATFORM == 'r201812') {
+            currentBuild.displayName = "#${BUILD_NUMBER}(4.10)"
+          } else if (params.TARGET_PLATFORM == 'r201809') {
+            currentBuild.displayName = "#${BUILD_NUMBER}(4.9)"
+          } else if (params.TARGET_PLATFORM == 'photon') {
+            currentBuild.displayName = "#${BUILD_NUMBER}(4.8)"
+          } else {
+            currentBuild.displayName = "#${BUILD_NUMBER}(4.7)"
+          }
+        }
+
+        dir('build') { deleteDir() }
+        dir('.m2/repository/org/eclipse/xtext') { deleteDir() }
+        dir('.m2/repository/org/eclipse/xtend') { deleteDir() }
+
+        sh '''
+          escaped() {
+            echo $BRANCH_NAME | sed 's/\\//%252F/g'
+          }
+          
+          escapedBranch=$(escaped)
+          
+          sed_inplace() {
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              sed -i '' "$@"
+            else
+              sed -i "$@" 
+            fi  
+          }
+          
+          targetfiles="$(find releng -type f -iname '*.target')"
+          for targetfile in $targetfiles
+          do
+            echo "Redirecting target platforms in $targetfile to $JENKINS_URL"
+            sed_inplace "s?<repository location=\\".*/job/\\([^/]*\\)/job/[^/]*/?<repository location=\\"$JENKINS_URL/job/\\1/job/$escapedBranch/?" $targetfile
+          done
+        '''
+      }
+    }
+    
+    stage('Gradle Build') {
+      steps {
+        container('cbi-default') {
+          sh "./1-gradle-build.sh"
+          step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/test/*.xml'])
+        }
+      }
     }
 
     stage('Maven Build & Test') {
       parallel {
-        stage('Gradle Build') {
-          steps {
-            sh "./1-gradle-build.sh"
-            step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/test/*.xml'])
-          }
-        }
-    
         stage('Maven Plugin Build') {
           steps {
+            container('plugin-build') {
             dir('.m2/repository/org/eclipse/xtext') { deleteDir() }
             dir('.m2/repository/org/eclipse/xtend') { deleteDir() }
-            configFileProvider(
-              [configFile(fileId: '7a78c736-d3f8-45e0-8e69-bf07c27b97ff', variable: 'MAVEN_SETTINGS')]) {
-                sh "./2-maven-plugin-build.sh"
+            configFileProvider([configFile(fileId: '7a78c736-d3f8-45e0-8e69-bf07c27b97ff', variable: 'MAVEN_SETTINGS')]) {
+              sh "./2-maven-plugin-build.sh"
+              step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/*.xml'])
+            }
+            }
+          } // END steps
+        } // END stage
+        
+        stage('Maven Tycho Build') {
+          steps {
+            container('plugin-build') {
+              configFileProvider([configFile(fileId: '7a78c736-d3f8-45e0-8e69-bf07c27b97ff', variable: 'MAVEN_SETTINGS')]) {
+                wrap([$class:'Xvnc', useXauthority: true]) {
+                  sh "./3-maven-tycho-build.sh -s $MAVEN_SETTINGS --tp=${params.TARGET_PLATFORM}"
+                }
                 step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/*.xml'])
               }
             }
-          }
-        }
-    
-        stage('Maven Tycho Build') {
+          }// END steps
+        } // END stage
+        
+        stage('Gradle Longrunning Tests') {
           steps {
-            wrap([$class:'Xvnc', useXauthority: true]) {
-              sh "./3-maven-tycho-build.sh --tp=${params.TARGET_PLATFORM}"
+            container('plugin-build') {
+            sh "./gradlew longrunningTest -PuseJenkinsSnapshots=true -PJENKINS_URL=$JENKINS_URL -PignoreTestFailures=true --continue"
+            step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/longrunningTest/*.xml'])
             }
-            step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/*.xml'])
           }
-        }
-      }
-    }
+        } // END stage
+      } // END parallel
+    } // END stage
   }
 
   post {
     success {
+      archiveArtifacts artifacts: 'build/**'
+    }
+    failure {
       archiveArtifacts artifacts: 'org.eclipse.xtend.ide.swtbot.tests/screenshots/**, build/**, **/target/work/data/.metadata/.log, **/hs_err_pid*.log'
     }
     changed {

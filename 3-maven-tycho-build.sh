@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 if [ -z "$JENKINS_URL" ]; then
   # if not set in environment use default
   JENKINS_URL=https://ci.eclipse.org/xtext/

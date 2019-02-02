@@ -2,14 +2,14 @@ pipeline {
   agent {
     kubernetes {
       label 'build-test-pod'
-      defaultContainer 'cbi-default'
+      defaultContainer 'jnlp'
       yaml '''
         apiVersion: v1
         kind: Pod
         spec:
           containers:
-          - name: cbi-default
-            image: 'eclipsecbi/jenkins-cbi-default-agent'
+          - name: jnlp
+            image: 'eclipsecbi/jenkins-jnlp-agent'
             args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
             volumeMounts:
             - mountPath: /home/jenkins/.ssh
@@ -100,7 +100,7 @@ pipeline {
     
     stage('Gradle Build') {
       steps {
-        container('cbi-default') {
+        container('jnlp') {
           sh "./1-gradle-build.sh"
           step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/test/*.xml'])
         }

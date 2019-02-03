@@ -9,14 +9,12 @@ package org.eclipse.xtend.ide.tests.contentassist
 
 import org.eclipse.xtend.ide.tests.contentassist.AbstractXtendContentAssistBugTest
 import org.junit.Test
-import org.eclipse.xtext.testing.Flaky
 
 /**
  * @author Stefan Oehme - Initial contribution and API
  */
 class DataContentAssistTest extends AbstractXtendContentAssistBugTest {
 	
-	@Flaky
 	@Test def void testDataAnnotation() throws Exception {
 		newBuilder().append("@Data").assertText(
 			"org.eclipse.xtend.lib.annotations.Data",

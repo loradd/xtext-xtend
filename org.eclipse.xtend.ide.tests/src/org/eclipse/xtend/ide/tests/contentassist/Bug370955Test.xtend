@@ -7,7 +7,6 @@
  *******************************************************************************/
 package org.eclipse.xtend.ide.tests.contentassist
 
-import org.eclipse.xtext.testing.Flaky
 import org.junit.Test
 
 /**
@@ -15,7 +14,6 @@ import org.junit.Test
  */
 class Bug370955Test extends AbstractXtendContentAssistBugTest {
 	
-	@Flaky
 	@Test def void test_01() throws Exception {
 		newBuilder.append('''
 			class C {
@@ -29,7 +27,6 @@ class Bug370955Test extends AbstractXtendContentAssistBugTest {
 		)
 	}
 	
-	@Flaky
 	@Test def void test_02() throws Exception {
 		newBuilder.append('''
 			class C {
@@ -43,7 +40,6 @@ class Bug370955Test extends AbstractXtendContentAssistBugTest {
 		)
 	}
 	
-	@Flaky
 	@Test def void test_03() throws Exception {
 		newBuilder.append('''
 			class C {
@@ -58,7 +54,6 @@ class Bug370955Test extends AbstractXtendContentAssistBugTest {
 		)
 	}
 
-	@Flaky
 	@Test def void test_04() throws Exception {
 		newBuilder.append('''
 			class C {

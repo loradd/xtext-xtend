@@ -41,10 +41,6 @@ public class XtendTraceTests extends AbstractXtendUITestCase {
 	@Inject
 	private ITraceForStorageProvider traceInformation;
 
-	@Rule
-	public Flaky.Rule flakyRule = new Flaky.Rule();
-
-	@Flaky
 	@Test
 	public void testMarkerForTraceIsInstalled() throws Exception {
 		IFile file = testHelper.createFile("test/Test", "package test\nclass Test {}");

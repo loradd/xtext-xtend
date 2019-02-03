@@ -8,14 +8,12 @@
 package org.eclipse.xtend.ide.tests.contentassist
 
 import org.junit.Test
-import org.eclipse.xtext.testing.Flaky
 
 /**
  * @author Sebastian Zarnekow - Initial contribution and API
  */
 class Bug437678Test extends AbstractXtendContentAssistBugTest {
 	
-	@Flaky
 	@Test def void test_01() throws Exception {
 		newBuilder.append('''
 			class A {
@@ -56,7 +54,6 @@ class Bug437678Test extends AbstractXtendContentAssistBugTest {
 			.assertTextAtCursorPosition('ethod|', 'methodA', 'main')
 	}
 	
-	@Flaky
 	@Test def void test_03() throws Exception {
 		newBuilder.append('''
 			class A {
@@ -97,7 +94,6 @@ class Bug437678Test extends AbstractXtendContentAssistBugTest {
 			.assertTextAtCursorPosition('ethod|', 'main()')
 	}
 	
-	@Flaky
 	@Test def void test_05() throws Exception {
 		newBuilder.append('''
 			class A {

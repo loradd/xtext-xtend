@@ -9,7 +9,6 @@ package org.eclipse.xtend.ide.tests.contentassist;
 
 import org.eclipse.xtend.ide.tests.contentassist.AbstractXtendContentAssistBugTest;
 import org.eclipse.xtend2.lib.StringConcatenation;
-import org.eclipse.xtext.testing.Flaky;
 import org.eclipse.xtext.ui.testing.ContentAssistProcessorTestBuilder;
 import org.junit.Test;
 
@@ -18,7 +17,6 @@ import org.junit.Test;
  */
 @SuppressWarnings("all")
 public class Bug439019Test extends AbstractXtendContentAssistBugTest {
-  @Flaky
   @Test
   public void test_01() throws Exception {
     ContentAssistProcessorTestBuilder _newBuilder = this.newBuilder();

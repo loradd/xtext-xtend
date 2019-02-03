@@ -7,7 +7,6 @@
  *******************************************************************************/
 package org.eclipse.xtend.ide.tests.contentassist
 
-import org.eclipse.xtext.testing.Flaky
 import org.junit.Test
 
 /**
@@ -27,7 +26,6 @@ class MemberFeatureCallProposalsTest extends AbstractXtendContentAssistBugTest {
 			.assertTextAtCursorPosition('em', 2, 'empty')
 	}
 	
-	@Flaky
 	@Test def void test_02() throws Exception {
 		newBuilder.append('''
 			class C {
@@ -40,7 +38,6 @@ class MemberFeatureCallProposalsTest extends AbstractXtendContentAssistBugTest {
 			.assertTextAtCursorPosition('em', 2, 'empty', 'emptyList', 'emptyMap', 'emptySet')
 	}
 	
-	@Flaky
 	@Test def void test_03() throws Exception {
 		newBuilder.append('''
 			class C {
@@ -53,7 +50,6 @@ class MemberFeatureCallProposalsTest extends AbstractXtendContentAssistBugTest {
 			.assertTextAtCursorPosition('em', 2, 'empty', 'emptyList', 'emptyMap', 'emptySet')
 	}
 	
-	@Flaky
 	@Test def void test_04() throws Exception {
 		newBuilder.append('''
 			class C {

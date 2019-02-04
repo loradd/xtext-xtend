@@ -15,7 +15,7 @@ pipeline {
             - mountPath: /home/jenkins/.ssh
               name: volume-known-hosts
           - name: plugin-build
-            image: eclipsecbi/debian-gtk3-metacity:9-gtk3.22
+            image: mickaelistria/wildwebdeveloper-build-test-dependencies@sha256:c9336c2b3ab06cc803e7465c2c1a3cea58bd09cbe5cbaf44f3630a77a9290e2f
             tty: true
             command: [ "uid_entrypoint", "cat" ]
           volumes:
@@ -30,12 +30,6 @@ pipeline {
     choice(name: 'TARGET_PLATFORM', choices: ['latest', 'oxygen', 'photon', 'r201809', 'r201812'], description: 'Which Target Platform should be used?')
   }
 
-  tools {
-    // see https://wiki.eclipse.org/Jenkins#Jenkins_configuration_and_tools_.28clustered_infra.29
-    maven 'apache-maven-latest'
-    jdk 'oracle-jdk8-latest'
-  }
-  
   options {
     buildDiscarder(logRotator(numToKeepStr:'15'))
   }

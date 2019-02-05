@@ -3,6 +3,7 @@
  */
 
 sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'ISO-8859-1'

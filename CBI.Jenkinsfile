@@ -32,6 +32,7 @@ pipeline {
 
   options {
     buildDiscarder(logRotator(numToKeepStr:'15'))
+    disableConcurrentBuilds()
   }
 
   // https://jenkins.io/doc/book/pipeline/syntax/#triggers

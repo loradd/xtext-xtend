@@ -41,6 +41,7 @@ import org.eclipse.xtend.core.resource.XtendResourceDescriptionStrategy
 import org.eclipse.xtend.core.scoping.AnonymousClassConstructorScopes
 import org.eclipse.xtend.core.scoping.XtendImportedNamespaceScopeProvider
 import org.eclipse.xtend.core.serializer.XtendSerializerScopeProvider
+import org.eclipse.xtend.core.tasks.XtendTaskFinder
 import org.eclipse.xtend.core.tasks.XtendTaskTagProvider
 import org.eclipse.xtend.core.typesystem.LocalClassAwareTypeNames
 import org.eclipse.xtend.core.typesystem.TypeDeclarationAwareBatchTypeResolver
@@ -81,9 +82,11 @@ import org.eclipse.xtext.resource.persistence.IResourceStorageFacade
 import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
 import org.eclipse.xtext.serializer.tokens.SerializerScopeProviderBinding
+import org.eclipse.xtext.tasks.ITaskFinder
 import org.eclipse.xtext.tasks.ITaskTagProvider
 import org.eclipse.xtext.validation.CompositeEValidator
 import org.eclipse.xtext.validation.ConfigurableIssueCodesProvider
+import org.eclipse.xtext.validation.IDiagnosticConverter
 import org.eclipse.xtext.validation.IResourceValidator
 import org.eclipse.xtext.xbase.XbaseFactory
 import org.eclipse.xtext.xbase.compiler.JvmModelGenerator
@@ -104,13 +107,15 @@ import org.eclipse.xtext.xbase.typesystem.util.HumanReadableTypeNames
 import org.eclipse.xtext.xbase.util.XExpressionHelper
 import org.eclipse.xtext.xbase.validation.EarlyExitValidator
 import org.eclipse.xtext.xbase.validation.ImplicitReturnFinder
-import org.eclipse.xtext.tasks.ITaskFinder
-import org.eclipse.xtend.core.tasks.XtendTaskFinder
 
 /** 
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class XtendRuntimeModule extends AbstractXtendRuntimeModule {
+
+	def Class<? extends IDiagnosticConverter> bindIDiagnosticConverter() {
+		return EObjectValidatorDetector
+	}
 
 	def XbaseFactory bindXbaseFactory() {
 		return XbaseFactory.eINSTANCE
@@ -125,12 +130,12 @@ class XtendRuntimeModule extends AbstractXtendRuntimeModule {
 	}
 
 	override void configureIScopeProviderDelegate(Binder binder) {
-		binder.bind(IScopeProvider).annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE)).to(XtendImportedNamespaceScopeProvider)
+		binder.bind(IScopeProvider).annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE)).to(
+			XtendImportedNamespaceScopeProvider)
 	}
 
 	override void configureSerializerIScopeProvider(Binder binder) {
-		binder.bind(IScopeProvider).annotatedWith(SerializerScopeProviderBinding).to(
-			XtendSerializerScopeProvider)
+		binder.bind(IScopeProvider).annotatedWith(SerializerScopeProviderBinding).to(XtendSerializerScopeProvider)
 	}
 
 	def Class<? extends ConstructorScopes> bindConstructorScopes() {

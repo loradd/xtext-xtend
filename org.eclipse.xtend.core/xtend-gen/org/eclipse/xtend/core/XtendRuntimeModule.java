@@ -7,6 +7,7 @@ import com.google.inject.Binder;
 import com.google.inject.Provider;
 import com.google.inject.name.Names;
 import org.eclipse.xtend.core.AbstractXtendRuntimeModule;
+import org.eclipse.xtend.core.EObjectValidatorDetector;
 import org.eclipse.xtend.core.compiler.UnicodeAwarePostProcessor;
 import org.eclipse.xtend.core.compiler.XtendCompiler;
 import org.eclipse.xtend.core.compiler.XtendGenerator;
@@ -87,6 +88,7 @@ import org.eclipse.xtext.tasks.ITaskFinder;
 import org.eclipse.xtext.tasks.ITaskTagProvider;
 import org.eclipse.xtext.validation.CompositeEValidator;
 import org.eclipse.xtext.validation.ConfigurableIssueCodesProvider;
+import org.eclipse.xtext.validation.IDiagnosticConverter;
 import org.eclipse.xtext.validation.IResourceValidator;
 import org.eclipse.xtext.xbase.XbaseFactory;
 import org.eclipse.xtext.xbase.compiler.JvmModelGenerator;
@@ -113,6 +115,10 @@ import org.eclipse.xtext.xbase.validation.ImplicitReturnFinder;
  */
 @SuppressWarnings("all")
 public class XtendRuntimeModule extends AbstractXtendRuntimeModule {
+  public Class<? extends IDiagnosticConverter> bindIDiagnosticConverter() {
+    return EObjectValidatorDetector.class;
+  }
+  
   public XbaseFactory bindXbaseFactory() {
     return XbaseFactory.eINSTANCE;
   }
@@ -128,13 +134,13 @@ public class XtendRuntimeModule extends AbstractXtendRuntimeModule {
   
   @Override
   public void configureIScopeProviderDelegate(final Binder binder) {
-    binder.<IScopeProvider>bind(IScopeProvider.class).annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE)).to(XtendImportedNamespaceScopeProvider.class);
+    binder.<IScopeProvider>bind(IScopeProvider.class).annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE)).to(
+      XtendImportedNamespaceScopeProvider.class);
   }
   
   @Override
   public void configureSerializerIScopeProvider(final Binder binder) {
-    binder.<IScopeProvider>bind(IScopeProvider.class).annotatedWith(SerializerScopeProviderBinding.class).to(
-      XtendSerializerScopeProvider.class);
+    binder.<IScopeProvider>bind(IScopeProvider.class).annotatedWith(SerializerScopeProviderBinding.class).to(XtendSerializerScopeProvider.class);
   }
   
   public Class<? extends ConstructorScopes> bindConstructorScopes() {

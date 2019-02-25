@@ -68,8 +68,7 @@ node {
 			targetProfile = "-Poxygen"
 		}
 		wrap([$class:'Xvnc', useXauthority: true]) {
-			sh "${mvnHome}/bin/mvn -f tycho-pom.xml --batch-mode -fae -Dmaven.test.failure.ignore=true -DJENKINS_URL=$JENKINS_URL -Dmaven.repo.local=${WORKSPACE}/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn ${targetProfile} clean install -DskipTests"
-			sh "${mvnHome}/bin/mvn -f org.eclipse.xtend.ide.tests/pom.xml --batch-mode -fae -Dmaven.test.failure.ignore=true -DJENKINS_URL=$JENKINS_URL -Dmaven.repo.local=${WORKSPACE}/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn ${targetProfile} clean install -Dtest=QuickfixTest"
+			sh "${mvnHome}/bin/mvn -f tycho-pom.xml --batch-mode -fae -Dmaven.test.failure.ignore=true -DJENKINS_URL=$JENKINS_URL -Dmaven.repo.local=${WORKSPACE}/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn ${targetProfile} clean install"
 		}
 		step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/*.xml'])
 	}

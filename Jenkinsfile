@@ -46,20 +46,14 @@ node {
 		'''
 	}
 	
-	stage('Gradle Build') {
-		sh "./gradlew clean cleanGenerateXtext build createLocalMavenRepo -PuseJenkinsSnapshots=true -PJENKINS_URL=$JENKINS_URL -PcompileXtend=true -PignoreTestFailures=true --refresh-dependencies --continue"
-		step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/test/*.xml'])
-	}
+	
 	
 	def mvnHome = tool 'M3'
 	env.M2_HOME = "${mvnHome}"
 	dir('.m2/repository/org/eclipse/xtext') { deleteDir() }
 	dir('.m2/repository/org/eclipse/xtend') { deleteDir() }
 	
-	stage('Maven Plugin Build') {
-		sh "${mvnHome}/bin/mvn -f maven-pom.xml --batch-mode --update-snapshots -fae -PuseJenkinsSnapshots -DJENKINS_URL=$JENKINS_URL -DWORKSPACE=$WORKSPACE -Dmaven.test.failure.ignore=true -Dit-archetype-tests-skip=true -Dmaven.repo.local=${WORKSPACE}/.m2/repository -DgradleMavenRepo=file:${WORKSPACE}/build/maven-repository/ -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn clean deploy"
-	}
-
+	
 	stage('Maven Tycho Build') {
 		def targetProfile = "-Poxygen"
 		if ("latest" == params.target_platform) {
@@ -74,7 +68,8 @@ node {
 			targetProfile = "-Poxygen"
 		}
 		wrap([$class:'Xvnc', useXauthority: true]) {
-			sh "${mvnHome}/bin/mvn -f tycho-pom.xml --batch-mode -fae -Dmaven.test.failure.ignore=true -DJENKINS_URL=$JENKINS_URL -Dmaven.repo.local=${WORKSPACE}/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn ${targetProfile} clean install"
+			sh "${mvnHome}/bin/mvn -f tycho-pom.xml --batch-mode -fae -Dmaven.test.failure.ignore=true -DJENKINS_URL=$JENKINS_URL -Dmaven.repo.local=${WORKSPACE}/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn ${targetProfile} clean install -DskipTests"
+			sh "${mvnHome}/bin/mvn -f org.eclipse.xtend.ide.tests/pom.xml --batch-mode -fae -Dmaven.test.failure.ignore=true -DJENKINS_URL=$JENKINS_URL -Dmaven.repo.local=${WORKSPACE}/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn ${targetProfile} clean install -Dtest=QuickfixTest"
 		}
 		step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/*.xml'])
 	}

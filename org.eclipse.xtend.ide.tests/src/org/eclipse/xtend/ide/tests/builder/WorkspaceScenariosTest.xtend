@@ -79,7 +79,7 @@ class WorkspaceScenariosTest {
 				}
 				return true
 			]
-			Assert.assertEquals(2, allXtendMarkers.size)
+			Assert.assertEquals(printMarker(allXtendMarkers), 2, allXtendMarkers.size)
 			assertEquals(1, persistedResourceDescriptions.get.allResourceDescriptions.length)
 		} finally {
 			project.delete(true, true, null)

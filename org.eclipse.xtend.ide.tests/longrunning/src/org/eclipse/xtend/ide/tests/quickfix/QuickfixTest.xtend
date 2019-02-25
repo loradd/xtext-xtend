@@ -1,12 +1,17 @@
 package org.eclipse.xtend.ide.tests.quickfix
 
 import com.google.inject.Inject
+import com.google.inject.Provider
 import org.eclipse.core.runtime.NullProgressMonitor
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtend.ide.tests.AbstractXtendUITestCase
 import org.eclipse.xtend.ide.tests.WorkbenchTestHelper
 import org.eclipse.xtext.diagnostics.Diagnostic
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.ui.refactoring.ui.SyncUtil
 import org.eclipse.xtext.util.JavaVersion
+import org.eclipse.xtext.validation.IssueSeveritiesProvider
 import org.eclipse.xtext.xbase.validation.IssueCodes
 import org.junit.After
 import org.junit.Assume
@@ -30,6 +35,19 @@ class QuickfixTest extends AbstractXtendUITestCase {
 	override tearDown() {
 		builder.tearDown
 	}
+	
+	@Inject IssueSeveritiesProvider isp
+	
+	@Inject
+	Provider<ResourceSet> rsp;
+	
+	@Test
+	def void testSeShit() {
+		val rs = rsp.get
+		val r = rs.createResource(URI.createURI("platform:/resource/dummy/demo.xtend"))
+		val s = isp.getIssueSeverities(r).getSeverity(UNNECESSARY_MODIFIER);
+		assertEquals(Severity.WARNING, s)
+	}
 
 	@Test
 	def void testBug456803() {
@@ -41,7 +59,7 @@ class QuickfixTest extends AbstractXtendUITestCase {
 		''')
 		waitForBuild(new NullProgressMonitor)
 		create("bar/Bar.xtend",'''
-			package bar
+			package barf
 			class X {
 			  var Inner| inner
 			}

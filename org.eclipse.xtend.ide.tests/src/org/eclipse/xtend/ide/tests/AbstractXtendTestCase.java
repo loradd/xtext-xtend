@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EValidator;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtend.core.xtend.XtendAnnotationType;
 import org.eclipse.xtend.core.xtend.XtendClass;
@@ -24,8 +25,8 @@ import org.eclipse.xtend.core.xtend.XtendField;
 import org.eclipse.xtend.core.xtend.XtendFile;
 import org.eclipse.xtend.core.xtend.XtendFunction;
 import org.eclipse.xtend.core.xtend.XtendInterface;
+import org.eclipse.xtend.core.xtend.XtendPackage;
 import org.eclipse.xtext.diagnostics.Severity;
-import org.eclipse.xtext.xbase.testing.TemporaryFolder;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.testing.InjectWith;
@@ -34,7 +35,9 @@ import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.StringInputStream;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.Issue;
+import org.eclipse.xtext.xbase.testing.TemporaryFolder;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 
@@ -56,6 +59,12 @@ public abstract class AbstractXtendTestCase extends Assert {
 	
 	@Inject
 	private Provider<XtextResourceSet> resourceSetProvider;
+	
+	@Before
+	public void assertHasValidator() {
+		EValidator validator = EValidator.Registry.INSTANCE.getEValidator(XtendPackage.eINSTANCE);
+		assertNotNull(validator);
+	}
 
 	protected XtendClass clazz(String string) throws Exception {
 		return (XtendClass) file(string).getXtendTypes().get(0);

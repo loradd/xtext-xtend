@@ -7,11 +7,14 @@
  *******************************************************************************/
 package org.eclipse.xtend.ide.tests;
 
+import org.eclipse.emf.ecore.EValidator;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.xtend.ide.internal.XtendActivator;
+import org.eclipse.xtend.core.xtend.XtendPackage;
+import org.eclipse.xtext.testing.InjectWith;
+import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil;
 import org.eclipse.xtext.ui.testing.util.TargetPlatformUtil;
@@ -23,19 +26,30 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 /**
  * @author Jan Koehnlein - Initial contribution and API
  */
+@InjectWith(XtendIDEInjectorProvider.class)
+@RunWith(XtextRunner.class)
 public abstract class AbstractXtendUITestCase extends Assert {
 
-	private static Injector injector = XtendActivator.getInstance().getInjector("org.eclipse.xtend.core.Xtend");
+	@Inject
+	private Injector injector;
+	
+	@Before
+	public void assertHasValidator() {
+		EValidator validator = EValidator.Registry.INSTANCE.getEValidator(XtendPackage.eINSTANCE);
+		assertNotNull(validator);
+	}
 
 	@Before
 	public void setUp() throws Exception {
-		getInjector().injectMembers(this);
+		//getInjector().injectMembers(this);
 	}
 
 	@After

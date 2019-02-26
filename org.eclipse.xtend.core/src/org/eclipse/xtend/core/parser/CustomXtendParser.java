@@ -8,15 +8,20 @@
 package org.eclipse.xtend.core.parser;
 
 import java.io.Reader;
+import java.util.stream.Collectors;
 
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.TokenSource;
+import org.eclipse.emf.ecore.EValidator;
 import org.eclipse.xtend.core.parser.antlr.XtendParser;
 import org.eclipse.xtend.core.parser.antlr.internal.FlexerFactory;
 import org.eclipse.xtext.ParserRule;
 import org.eclipse.xtext.RuleCall;
+import org.eclipse.xtext.common.types.TypesPackage;
 import org.eclipse.xtext.nodemodel.impl.NodeModelBuilder;
 import org.eclipse.xtext.parser.IParseResult;
+import org.eclipse.xtext.validation.CompositeEValidator;
+import org.eclipse.xtext.validation.CompositeEValidator.EValidatorEqualitySupport;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -31,6 +36,18 @@ import com.google.inject.Singleton;
 @Singleton
 public class CustomXtendParser extends XtendParser {
 
+	{
+		EValidator v = EValidator.Registry.INSTANCE.getEValidator(TypesPackage.eINSTANCE);
+		if (!(v instanceof CompositeEValidator)) {
+			throw new AssertionError("Validator for TypesPackage is not a composite validator: " + v);
+		}
+		CompositeEValidator casted = (CompositeEValidator) v;
+		if (casted.getContents().size() <= 1) {
+			throw new AssertionError("Validator for TypesPackage is not a composite validator: " + 
+					casted.getContents().stream().map(it->it.getDelegate().getClass().getName()).collect(Collectors.joining(", ")));
+		}
+	}
+	
 	@Inject
 	private FlexerFactory flexerFactory;
 	

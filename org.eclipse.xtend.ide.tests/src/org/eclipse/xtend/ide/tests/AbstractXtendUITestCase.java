@@ -13,12 +13,14 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtend.core.xtend.XtendPackage;
+import org.eclipse.xtext.common.types.TypesPackage;
 import org.eclipse.xtext.testing.InjectWith;
 import org.eclipse.xtext.testing.XtextRunner;
 import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil;
 import org.eclipse.xtext.ui.testing.util.TargetPlatformUtil;
 import org.eclipse.xtext.util.JavaVersion;
+import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.lib.Pair;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -43,8 +45,14 @@ public abstract class AbstractXtendUITestCase extends Assert {
 	
 	@Before
 	public void assertHasValidator() {
-		EValidator validator = EValidator.Registry.INSTANCE.getEValidator(XtendPackage.eINSTANCE);
-		assertNotNull(validator);
+		EValidator xtendValidator = EValidator.Registry.INSTANCE.getEValidator(XtendPackage.eINSTANCE);
+		assertNotNull(xtendValidator);
+		
+		EValidator xbaseValidator = EValidator.Registry.INSTANCE.getEValidator(XbasePackage.eINSTANCE);
+		assertNotNull(xbaseValidator);
+		
+		EValidator typesValidator = EValidator.Registry.INSTANCE.getEValidator(TypesPackage.eINSTANCE);
+		assertNotNull(typesValidator);
 	}
 
 	@Before

@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.eclipse.core.resources.IFile;
@@ -23,11 +24,13 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.emf.ecore.EValidator;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.xtend.ide.tests.WorkbenchTestHelper;
 import org.eclipse.xtend.ide.tests.XtendIDEInjectorProvider;
 import org.eclipse.xtend2.lib.StringConcatenation;
+import org.eclipse.xtext.common.types.TypesPackage;
 import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider;
 import org.eclipse.xtext.testing.InjectWith;
@@ -36,6 +39,8 @@ import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil;
 import org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil;
 import org.eclipse.xtext.ui.testing.util.TargetPlatformUtil;
 import org.eclipse.xtext.util.StringInputStream;
+import org.eclipse.xtext.validation.CompositeEValidator;
+import org.eclipse.xtext.xbase.XbasePackage;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
@@ -107,7 +112,37 @@ public class WorkspaceScenariosTest {
           return true;
         };
         project.accept(_function_1);
-        Assert.assertEquals(IResourcesSetupUtil.printMarker(((IMarker[])Conversions.unwrapArray(allXtendMarkers, IMarker.class))), 2, allXtendMarkers.size());
+        final StringBuilder info = new StringBuilder();
+        info.append("types:\n");
+        EValidator v = EValidator.Registry.INSTANCE.getEValidator(TypesPackage.eINSTANCE);
+        if ((v instanceof CompositeEValidator)) {
+          List<CompositeEValidator.EValidatorEqualitySupport> _contents = ((CompositeEValidator)v).getContents();
+          for (final CompositeEValidator.EValidatorEqualitySupport d : _contents) {
+            EValidator _delegate = d.getDelegate();
+            String _plus = ("delegate " + _delegate);
+            String _plus_1 = (_plus + "\n");
+            info.append(_plus_1);
+          }
+        } else {
+          info.append((("no CompositeEValidator but" + v) + "\n"));
+        }
+        info.append("xbase:\n");
+        v = EValidator.Registry.INSTANCE.getEValidator(XbasePackage.eINSTANCE);
+        if ((v instanceof CompositeEValidator)) {
+          List<CompositeEValidator.EValidatorEqualitySupport> _contents_1 = ((CompositeEValidator)v).getContents();
+          for (final CompositeEValidator.EValidatorEqualitySupport d_1 : _contents_1) {
+            EValidator _delegate_1 = d_1.getDelegate();
+            String _plus_2 = ("delegate " + _delegate_1);
+            String _plus_3 = (_plus_2 + "\n");
+            info.append(_plus_3);
+          }
+        } else {
+          info.append((("no CompositeEValidator but" + v) + "\n"));
+        }
+        String _string = info.toString();
+        String _printMarker = IResourcesSetupUtil.printMarker(((IMarker[])Conversions.unwrapArray(allXtendMarkers, IMarker.class)));
+        String _plus_4 = (_string + _printMarker);
+        Assert.assertEquals(_plus_4, 2, allXtendMarkers.size());
         Assert.assertEquals(1, ((Object[])Conversions.unwrapArray(this.persistedResourceDescriptions.get().getAllResourceDescriptions(), Object.class)).length);
       } finally {
         project.delete(true, true, null);

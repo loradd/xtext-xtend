@@ -36,6 +36,10 @@ import static org.junit.Assert.*
 import static extension org.eclipse.xtend.ide.tests.WorkbenchTestHelper.*
 import static extension org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 import static extension org.eclipse.xtext.ui.testing.util.JavaProjectSetupUtil.*
+import org.eclipse.emf.ecore.EValidator
+import org.eclipse.xtext.xbase.XbasePackage
+import org.eclipse.xtext.validation.CompositeEValidator
+import org.eclipse.xtext.common.types.TypesPackage
 
 /**
  * @author Sven Efftinge - Initial contribution and API
@@ -79,7 +83,26 @@ class WorkspaceScenariosTest {
 				}
 				return true
 			]
-			Assert.assertEquals(printMarker(allXtendMarkers), 2, allXtendMarkers.size)
+			val info = new StringBuilder
+			info.append("types:\n")
+			var v = EValidator.Registry.INSTANCE.getEValidator(TypesPackage.eINSTANCE);
+			if (v instanceof CompositeEValidator) {
+				for (d : v.contents) {
+					info.append("delegate " + d.delegate + "\n")
+				}
+			} else {
+				info.append("no CompositeEValidator but" + v + "\n")
+			}
+			info.append("xbase:\n")
+			v = EValidator.Registry.INSTANCE.getEValidator(XbasePackage.eINSTANCE);
+			if (v instanceof CompositeEValidator) {
+				for (d : v.contents) {
+					info.append("delegate " + d.delegate + "\n")
+				}
+			} else {
+				info.append("no CompositeEValidator but" + v + "\n")
+			}
+			Assert.assertEquals(info.toString + printMarker(allXtendMarkers), 2, allXtendMarkers.size)
 			assertEquals(1, persistedResourceDescriptions.get.allResourceDescriptions.length)
 		} finally {
 			project.delete(true, true, null)
